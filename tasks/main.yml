@@ -1,0 +1,175 @@
+---
+- name: include OS family variables
+  include_vars: "os_{{ ansible_os_family }}.yml"
+  tags: [ always ]
+
+- name: fetch the config params
+  set_facts:
+    sshd_config_params:
+      - { name: AllowGroup, value: "{{ sshd_allow_groups | join(' ') }}" }
+      - { name: AllowUser, value: "{{ sshd_allow_users | join(' ') }}" }
+      - { name: ChallengeResponseAuthentication, value: 'no' }
+      - { name: DenyGroup: value: "{{ sshd_deny_groups | join(' ') }}" }
+      - { name: DenyUser: value: "{{ sshd_deny_users | join(' ') }}" }
+      - { name: UsePAM, value: 'yes' }
+      - { name: UseDNS, value: 'no' }
+      - { name: PasswordAuthentication, value: "{% if sshd_ask_pass %}yes{% else %}no{% endif %}" }
+      - { name: PermitRootLogin, value: "{{ sshd_permit_root_login }}" }
+      - { name: AllowAgentForwarding, value: "{% if sshd_agent_forwarding %}yes{% else %}no{% endif %}" }
+      - { name: AllowTcpForwarding, value: "{% if sshd_tcp_forwarding %}yes{% else %}no{% endif %}" }
+      - { name: X11Forwarding, value: "{% if sshd_x11_forwarding %}yes{% else %}no{% endif %}" }
+      - { name: GSSAPIAuthentication, value: 'no' }
+      - { name: KerberosAuthentication, value: 'no' }
+      tags: [ always ]
+
+- name: backup the config file
+  become: yes
+  shell: "cp -af {{ sshd_config_file }} {{ sshd_config_file }}.orig"
+  args:
+    creates: "{{ sshd_config_file }}.orig"
+
+- name: set default listen port
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#?Port "
+    line: "Port {{ sshd_port | int }}"
+    validate: "{{ sshd_executable }} -t -f %s"
+  notify: sshd restart
+
+- name: set default address family
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#?AddressFamily "
+    line: "AddressFamily {{ sshd_address_family }}"
+    validate: "{{ sshd_executable }} -t -f %s"
+  notify: sshd restart
+
+- name: set listening addresses and ports
+  become: yes
+  blockinfile:
+    path: "{{ sshd_config_file }}"
+    insertafter: "^#ListenAddress "
+    block: |
+      {% for sa in sshd_listen %}
+      {% if sa.ipv4 is defined and sa.ipv6 is not defined %}ListenAddress {{ sa.ipv4 | ipv4 }}{% if sa.port is defined %}:{{ sa.port | int }}{% endif %}
+      {% elif sa.ipv6 is defined and sa.ipv4 is not defined %}ListenAddress [{{ sa.ipv6 | ipv6 }}]{% if sa.port is defined %}:{{ sa.port | int }}{% endif %}
+      {% else %}{{ "Invalid sshd_listen variable."/0 }}
+      {% endif %}
+      {% endfor %}
+    validate: "{{ sshd_executable }} -t -f %s"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
+  notify: sshd restart
+
+- name: erase initialize listen address param
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#ListenAddress "
+    state: absent
+    validate: "{{ sshd_executable }} -t -f %s"
+  when: sshd_listen is defined
+  notify: sshd restart
+
+- name: apply the config params
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#?{{ item.name }} "
+    line: "{{ item.name }} {{ item.value }}"
+    validate: "{{ sshd_executable }} -t -f %s"
+  with_items: "{{ sshd_config_params }}"
+  notify: sshd restart
+
+- name: set the sftp executable
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: '^#?Subsystem\s+sftp'
+    line: "Subsystem sftp {% if sshd_use_internal_sftp %}internal-sftp{% else %}{{ sshd_sftp_server_executable }}{% endif %}"
+    validate: "{{ sshd_executable }} -t -f %s"
+  notify: sshd restart
+
+- name: sshd start
+  become: yes
+  service:
+    name: "{{ sshd_service }}"
+    state: started
+    enabled: yes
+  notify: sshd restart
+
+- name: put gossfile
+  become: yes
+  copy:
+    owner: root
+    mode: '0600'
+    content: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      service:
+        sshd:
+          running: true
+          enabled: true
+      port:
+      {% if sshd_listen | length > 0 %}
+      {% for sa in sshd_listen %}
+      {% if sa.ipv4 is defined and sa.ipv6 is not defined %}
+        tcp:{{ sa.port | default(sshd_port) }}:
+          listening: true
+          ip:
+          - "{{ sa.ipv4 | ipv4 }}"
+      {% endif %}
+      {% if sa.ipv6 is defined and sa.ipv4 is not defined %}
+        tcp6:{{ sa.port | default(sshd_port) }}:
+          listening: true
+          ip:
+          - "{{ sa.ipv6 | ipv6 }}"
+      {% endif %}
+      {% endfor %}
+      {% else %}
+      {% if sshd_addrspec != "inet6" %}
+        tcp:{{ sshd_port | int }}:
+          listening: true
+          ip:
+          - "0.0.0.0"
+      {% endif %}
+      {% if sshd_addrspec != "inet" %}
+        tcp6:{{ sshd_port | int }}:
+          listening: true
+          ip:
+          - "::"
+      {% endif %}
+      {% endif %}
+      file:
+        {{ sshd_config_file }}:
+          exists: true
+          contains:
+      {% for item in sshd_config_params %}
+          - "/^{{ item.name }} {{ item.value }}$/"
+      {% endfor %}
+      {% if sshd_use_internal_sftp %}
+          - "/^Subsystem sftp internal-sftp$/"
+      {% else %}
+          - "/^Subsystem sftp {{ sshd_sftp_server_executable }}$/"
+      {% endif %}
+      user:
+      {% for user in sshd_allow_users %}
+        {{ user }}:
+          exists: true
+      {% endfor %}
+      {% for user in sshd_deny_users %}
+        {{ user }}:
+          exists: true
+      {% endfor %}
+      group:
+      {% for group in sshd_allow_groups %}
+        {{ group }}
+          exists: true
+      {% endfor %}
+      {% for group in sshd_deny_groups %}
+        {{ group }}
+          exists: true
+      {% endfor %}
+      # END ANSIBLE MANAGED BLOCK
+    dest: "{{ goss_dir }}/sshd.yml"
+  tags: [ sshd, goss ]

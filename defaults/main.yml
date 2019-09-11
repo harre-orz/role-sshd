@@ -1,0 +1,55 @@
+---
+# Specify the default ssh listen port
+sshd_port: 22
+
+
+# Specify the default address family bellow from
+#  - inet   :: allow IPv3 only
+#  - inet6  :: allow IPv6 only
+#  - any    :: allow all
+sshd_address_family: any
+
+
+# Specify the multiple listen addresses and ports, also the port can be omitted using `sshd_port`
+#
+# For example:
+# sshd_listen:
+#   - { ipv4: 192.168.0.1 }
+#   - { ipv4: 127.0.0.1, port: 2222 }
+#   - { ipv6: ::1, port: 8022 }
+sshd_listen: []
+
+
+# Whether to allow password authentication
+#  - yes :: allow
+#  - no  :: deny (public key only)
+sshd_ask_pass: yes
+
+
+# Whether to allow root login choose bellow from
+#  - 'yes'
+#  - 'no'
+#  - without-password
+#  - forced-commands-only
+# NOTICE: 'yes' or 'no' was bracket by single-quote
+sshd_permit_root_login: 'yes'
+
+
+## Specify the allow UNIX user/group
+sshd_allow_users: []
+sshd_allow_groups: [ sshusers ]
+
+
+# Specify the deny UNIX user/group
+sshd_deny_users: []
+sshd_deny_groups: []
+
+
+# Whether to sshd various forwarding mode
+sshd_agent_forwarding: yes
+sshd_tcp_forwarding: yes
+sshd_x11_forwarding: yes
+
+
+## Whether to use internal-sftp
+sshd_use_internal_sftp: no

@@ -1,0 +1,10 @@
+test-ansible:
+  image: ansible/ansible:centos7
+  before_script:
+    - python -V
+    - pip install ansible ansible-lint
+    - ansible --version
+  script:
+    - cd tests
+    - ansible-lint main.yml
+    - ansible-playbook main.yml

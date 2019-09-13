@@ -4,31 +4,59 @@
   tags: [ always ]
 
 - name: fetch the config params
-  set_facts:
+  set_fact:
     sshd_config_params:
-      - { name: AllowGroup, value: "{{ sshd_allow_groups | join(' ') }}" }
-      - { name: AllowUser, value: "{{ sshd_allow_users | join(' ') }}" }
-      - { name: ChallengeResponseAuthentication, value: 'no' }
-      - { name: DenyGroup: value: "{{ sshd_deny_groups | join(' ') }}" }
-      - { name: DenyUser: value: "{{ sshd_deny_users | join(' ') }}" }
-      - { name: UsePAM, value: 'yes' }
-      - { name: UseDNS, value: 'no' }
-      - { name: PasswordAuthentication, value: "{% if sshd_ask_pass %}yes{% else %}no{% endif %}" }
-      - { name: PermitRootLogin, value: "{{ sshd_permit_root_login }}" }
-      - { name: AllowAgentForwarding, value: "{% if sshd_agent_forwarding %}yes{% else %}no{% endif %}" }
-      - { name: AllowTcpForwarding, value: "{% if sshd_tcp_forwarding %}yes{% else %}no{% endif %}" }
-      - { name: X11Forwarding, value: "{% if sshd_x11_forwarding %}yes{% else %}no{% endif %}" }
-      - { name: GSSAPIAuthentication, value: 'no' }
-      - { name: KerberosAuthentication, value: 'no' }
-      tags: [ always ]
+      - name: AllowGroup
+        optional:
+        value: >-
+          {{ sshd_allow_groups | join(' ') }}
+      - name: AllowUser
+        optional:
+        value: >-
+          {{ sshd_allow_users | join(' ') }}
+      - name: ChallengeResponseAuthentication
+        value: 'no'
+      - name: DenyGroup
+        optiona:
+        value: >-
+          {{ sshd_deny_groups | join(' ') }}
+      - name: DenyUser
+        optiona:
+        value: >-
+          {{ sshd_deny_users | join(' ') }}
+      - name: UsePAM
+        value: 'yes'
+      - name: UseDNS
+        value: 'no'
+      - name: PasswordAuthentication
+        value: >-
+          {% if sshd_ask_pass %}yes{% else %}no{% endif %}
+      - name: PermitRootLogin
+        value: >-
+          {{ sshd_permit_root_login }}
+      - name: AllowAgentForwarding
+        value: >-
+          {% if sshd_agent_forwarding %}yes{% else %}no{% endif %}
+      - name: AllowTcpForwarding
+        value: >-
+          {% if sshd_tcp_forwarding %}yes{% else %}no{% endif %}
+      - name: X11Forwarding
+        value: >-
+          {% if sshd_x11_forwarding %}yes{% else %}no{% endif %}
+      - name: GSSAPIAuthentication
+        value: 'no'
+      - name: KerberosAuthentication
+        value: 'no'
+    tags: [ always ]
 
 - name: backup the config file
   become: yes
-  shell: "cp -af {{ sshd_config_file }} {{ sshd_config_file }}.orig"
+  shell: |
+    cp -af {{ sshd_config_file }} {{ sshd_config_file }}.orig
   args:
     creates: "{{ sshd_config_file }}.orig"
 
-- name: set default listen port
+- name: set the listen port
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
@@ -37,7 +65,7 @@
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd restart
 
-- name: set default address family
+- name: set the address family
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
@@ -87,7 +115,8 @@
   lineinfile:
     path: "{{ sshd_config_file }}"
     regexp: '^#?Subsystem\s+sftp'
-    line: "Subsystem sftp {% if sshd_use_internal_sftp %}internal-sftp{% else %}{{ sshd_sftp_server_executable }}{% endif %}"
+    line: >-
+      Subsystem sftp {% if sshd_use_internal_sftp %}internal-sftp{% else %}{{ sshd_sftp_server_executable }}{% endif %}
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd restart
 
@@ -172,4 +201,5 @@
       {% endfor %}
       # END ANSIBLE MANAGED BLOCK
     dest: "{{ goss_dir }}/sshd.yml"
+  when: goss_dir is defined
   tags: [ sshd, goss ]

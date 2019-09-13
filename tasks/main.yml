@@ -142,7 +142,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#{{ item.name }} "
+    regexp: "^#?{{ item.name }}[ \t]"
     line: >-
       {%- if item.optional is defined -%}
       {%- if item.value -%}

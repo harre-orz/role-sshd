@@ -7,66 +7,66 @@
   set_fact:
     sshd_config_params:
       # Require
-      # - name: ChallengeResponseAuthentication
-      #   value: 'no'
-      # - name: UsePAM
-      #   value: 'yes'
-      # - name: UseDNS
-      #   value: 'no'
-      # - name: PasswordAuthentication
-      #   value: >-
-      #     {%- if sshd_ask_pass -%}
-      #     yes
-      #     {%- else -%}
-      #     no
-      #     {%- endif -%}
-      # - name: PermitRootLogin
-      #   value: >-
-      #     {{ sshd_permit_root_login }}
-      # - name: AllowAgentForwarding
-      #   value: >-
-      #     {%- if sshd_agent_forwarding -%}
-      #     yes
-      #     {%- else -%}
-      #     no
-      #     {%- endif -%}
-      # - name: AllowTcpForwarding
-      #   value: >-
-      #     {%- if sshd_tcp_forwarding -%}
-      #     yes
-      #     {%- else -%}
-      #     no
-      #     {%- endif -%}
-      # - name: X11Forwarding
-      #   value: >-
-      #     {%- if sshd_x11_forwarding -%}
-      #     yes
-      #     {%- else -%}
-      #     no
-      #     {%- endif -%}
-      # - name: GSSAPIAuthentication
-      #   value: 'no'
-      # - name: KerberosAuthentication
-      #   value: 'no'
-      # # Optional
-      # - name: AllowUsers
-      #   optional:
-      #   value: >-
-      #     {%- if (sshd_allow_users + sshd_allow_groups) | length > 0 -%}
-      #     {{ ansible_ssh_user }} {{ sshd_allow_users | join(' ') }}
-      #     {%- endif -%}
-      # - name: AllowGroups
-      #   optional:
-      #   value: >-
-      #     {{ sshd_allow_groups | join(' ') }}
-      # - name: DenyUsers
-      #   optional:
-      #   value: >-
-      #     {{ sshd_deny_users | join(' ') }}
-      # - name: DenyGroups
-      #   optional:
-      #   value: >-
-      #     {{ sshd_deny_groups | join(' ') }}
+      - name: ChallengeResponseAuthentication
+        value: 'no'
+      - name: PasswordAuthentication
+        value: >-
+          {%- if sshd_ask_pass -%}
+          yes
+          {%- else -%}
+          no
+          {%- endif -%}
+      - name: PermitRootLogin
+        value: >-
+          {{ sshd_permit_root_login }}
+      - name: GSSAPIAuthentication
+        value: 'no'
+      - name: KerberosAuthentication
+        value: 'no'
+      - name: UsePAM
+        value: 'yes'
+      - name: UseDNS
+        value: 'no'
+      - name: AllowAgentForwarding
+        value: >-
+          {%- if sshd_agent_forwarding -%}
+          yes
+          {%- else -%}
+          no
+          {%- endif -%}
+      - name: AllowTcpForwarding
+        value: >-
+          {%- if sshd_tcp_forwarding -%}
+          yes
+          {%- else -%}
+          no
+          {%- endif -%}
+      - name: X11Forwarding
+        value: >-
+          {%- if sshd_x11_forwarding -%}
+          yes
+          {%- else -%}
+          no
+          {%- endif -%}
+      # Optional
+      - name: AllowUsers
+        optional:
+        value: >-
+          {%- if (sshd_allow_users + sshd_allow_groups) | length > 0 -%}
+          {{ ansible_ssh_user }} {{ sshd_allow_users | join(' ') }}
+          {%- endif -%}
+      - name: AllowGroups
+        optional:
+        value: >-
+          {{ sshd_allow_groups | join(' ') }}
+      - name: DenyUsers
+        optional:
+        value: >-
+          {{ sshd_deny_users | join(' ') }}
+      - name: DenyGroups
+        optional:
+        value: >-
+          {{ sshd_deny_groups | join(' ') }}
     tags: [ always ]
 
 - name: backup the config file

@@ -15,35 +15,35 @@
         value: 'no'
       - name: PasswordAuthentication
         value: >-
-          {% if sshd_ask_pass %}
+          {%- if sshd_ask_pass -%}
           yes
-          {% else %}
+          {%- else -%}
           no
-          {% endif %}
+          {%- endif -%}
       - name: PermitRootLogin
         value: >-
           {{ sshd_permit_root_login }}
       - name: AllowAgentForwarding
         value: >-
-          {% if sshd_agent_forwarding %}
+          {%- if sshd_agent_forwarding -%}
           yes
-          {% else %}
+          {%- else -%}
           no
-          {% endif %}
+          {%- endif -%}
       - name: AllowTcpForwarding
         value: >-
-          {% if sshd_tcp_forwarding %}
+          {%- if sshd_tcp_forwarding -%}
           yes
-          {% else %}
+          {%- else -%}
           no
-          {% endif %}
+          {%- endif -%}
       - name: X11Forwarding
         value: >-
-          {% if sshd_x11_forwarding %}
+          {%- if sshd_x11_forwarding -%}
           yes
-          {% else %}
+          {%- else -%}
           no
-          {% endif %}
+          {%- endif -%}
       - name: GSSAPIAuthentication
         value: 'no'
       - name: KerberosAuthentication
@@ -144,15 +144,15 @@
     path: "{{ sshd_config_file }}"
     regexp: "^#?{{ item.name }}[ \t]"
     line: >-
-      {% if item.optional is defined %}
-      {% if item.value %}
+      {%- if item.optional is defined -%}
+      {%- if item.value -%}
       {{ item.name }} {{ item.value }}
-      {% else %}
+      {%- else -%}
       #{{ item.name }}
-      {% endif %}
-      {% else %}
+      {%- endif -%}
+      {%- else -%}
       {{ item.name }} {{ item.value }}
-      {% endif %}
+      {%- endif -%}
     validate: "{{ sshd_executable }} -t -f %s"
   with_items: "{{ sshd_config_params }}"
   notify: sshd reload

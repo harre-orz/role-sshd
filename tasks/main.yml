@@ -6,48 +6,76 @@
 - name: fetch the config params
   set_fact:
     sshd_config_params:
-      - name: AllowGroup
-        optional:
-        value: >-
-          {{ sshd_allow_groups | join(' ') }}
-      - name: AllowUser
-        optional:
-        value: >-
-          {{ sshd_allow_users | join(' ') }}
+      # Require
       - name: ChallengeResponseAuthentication
         value: 'no'
-      - name: DenyGroup
+      - name: DenyGroups
         optiona:
         value: >-
           {{ sshd_deny_groups | join(' ') }}
-      - name: DenyUser
-        optiona:
-        value: >-
-          {{ sshd_deny_users | join(' ') }}
       - name: UsePAM
         value: 'yes'
       - name: UseDNS
         value: 'no'
       - name: PasswordAuthentication
         value: >-
-          {% if sshd_ask_pass %}yes{% else %}no{% endif %}
+          {% if sshd_ask_pass %}
+          yes
+          {% else %}
+          no
+          {% endif %}
       - name: PermitRootLogin
         value: >-
           {{ sshd_permit_root_login }}
       - name: AllowAgentForwarding
         value: >-
-          {% if sshd_agent_forwarding %}yes{% else %}no{% endif %}
+          {% if sshd_agent_forwarding %}
+          yes
+          {% else %}
+          no
+          {% endif %}
       - name: AllowTcpForwarding
         value: >-
-          {% if sshd_tcp_forwarding %}yes{% else %}no{% endif %}
+          {% if sshd_tcp_forwarding %}
+          yes
+          {% else %}
+          no
+          {% endif %}
       - name: X11Forwarding
         value: >-
-          {% if sshd_x11_forwarding %}yes{% else %}no{% endif %}
+          {% if sshd_x11_forwarding %}
+          yes
+          {% else %}
+          no
+          {% endif %}
       - name: GSSAPIAuthentication
         value: 'no'
       - name: KerberosAuthentication
         value: 'no'
+      # Optional
+      - name: AllowGroups
+        optional:
+        value: >-
+          {{ sshd_allow_groups | join(' ') }}
+      - name: AllowUsers
+        optional:
+        value: >-
+          {{ sshd_allow_users | join(' ') }}
+      - name: DenyUsers
+        optiona:
+        value: >-
+          {{ sshd_deny_users | join(' ') }}
     tags: [ always ]
+
+- name: apply the config params
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#?{{ item.name }}\s"
+    line: "{{ item.name }} {{ item.value }}"
+    validate: "{{ sshd_executable }} -t -f %s"
+  with_items: "{{ sshd_config_params }}"
+  notify: sshd reload
 
 - name: backup the config file
   become: yes
@@ -98,16 +126,6 @@
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
   when: sshd_listen is defined
-  notify: sshd reload
-
-- name: apply the config params
-  become: yes
-  lineinfile:
-    path: "{{ sshd_config_file }}"
-    regexp: "^#?{{ item.name }} "
-    line: "{{ item.name }} {{ item.value }}"
-    validate: "{{ sshd_executable }} -t -f %s"
-  with_items: "{{ sshd_config_params }}"
   notify: sshd reload
 
 - name: set the sftp executable

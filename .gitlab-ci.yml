@@ -7,6 +7,6 @@ test-centos7:
   script:
     - cd tests
     - ansible-lint main.yml
-    - ansible-playbook main.yml
+    - ansible-playbook --verbose --diff main.yml
   after_script:
     - sudo cat /etc/ssh/sshd_config

@@ -117,7 +117,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#?ListenAddress[ \t]"
+    regexp: "{{ '^#?' }}ListenAddress[ \t]"
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
   when: sshd_listen is defined
@@ -142,7 +142,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^{{ '#?' }}{{ item.name }}[ \t]"
+    regexp: "^#{{ item.name }} "
     line: >-
       {%- if item.optional is defined -%}
       {%- if item.value -%}

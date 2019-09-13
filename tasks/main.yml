@@ -52,7 +52,7 @@
       - name: AllowUsers
         optional:
         value: >-
-          {{ sshd_allow_users | join(' ') }}
+          {{ sshd_allow_users | join(' ') }} {{ ansible_ssh_user }}
       - name: AllowGroups
         optional:
         value: >-
@@ -73,6 +73,16 @@
     cp -af {{ sshd_config_file }} {{ sshd_config_file }}.orig
   args:
     creates: "{{ sshd_config_file }}.orig"
+
+- name: add allow/deny users
+  user:
+    name: "{{ item }}"
+  with_items: "{{ sshd_allow_users + sshd_deny_users }}"
+
+- name: add allow/deny groups
+  group:
+    name: "{{ item }}"
+  with_items: "{{ sshd_allow_groups + sshd_deny_groups }}"
 
 - name: set the listen port
   become: yes

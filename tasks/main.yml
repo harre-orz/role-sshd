@@ -67,16 +67,6 @@
           {{ sshd_deny_users | join(' ') }}
     tags: [ always ]
 
-- name: apply the config params
-  become: yes
-  lineinfile:
-    path: "{{ sshd_config_file }}"
-    regexp: "^#?{{ item.name }} "
-    line: "{{ item.name }} {{ item.value }}"
-    validate: "{{ sshd_executable }} -t -f %s"
-  with_items: "{{ sshd_config_params }}"
-  notify: sshd reload
-
 - name: backup the config file
   become: yes
   shell: |
@@ -88,7 +78,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#?Port "
+    regexp: "^#?Port[ \t]"
     line: "Port {{ sshd_port | int }}"
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd reload
@@ -97,7 +87,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#?AddressFamily "
+    regexp: "^#?AddressFamily[ \t]"
     line: "AddressFamily {{ sshd_address_family }}"
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd reload
@@ -106,7 +96,7 @@
   become: yes
   blockinfile:
     path: "{{ sshd_config_file }}"
-    insertafter: "^#ListenAddress "
+    insertafter: "^#ListenAddress[ \t]"
     block: |
       {% for sa in sshd_listen %}
       {% if sa.ipv4 is defined and sa.ipv6 is not defined %}ListenAddress {{ sa.ipv4 | ipv4 }}{% if sa.port is defined %}:{{ sa.port | int }}{% endif %}
@@ -122,7 +112,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#ListenAddress "
+    regexp: "^#ListenAddress[ \t]"
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
   when: sshd_listen is defined
@@ -132,10 +122,34 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: '^#?Subsystem\s+sftp'
+    regexp: '^#?Subsystem[ \t]+sftp[ \t]'
     line: >-
-      Subsystem sftp {% if sshd_use_internal_sftp %}internal-sftp{% else %}{{ sshd_sftp_server_executable }}{% endif %}
+      Subsystem sftp
+      {% if sshd_use_internal_sftp %}
+      internal-sftp
+      {% else %}
+      {{ sshd_sftp_server_executable }}
+      {% endif %}
     validate: "{{ sshd_executable }} -t -f %s"
+  notify: sshd reload
+
+- name: apply the config params
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#?{{ item.name }}[ \t]"
+    line: >-
+      {% if item.optional is defined %}
+      {% if item.value %}
+      {{ item.name }} {{ item.value }}
+      {% else %}
+      #{{ item.name }}
+      {% endif %}
+      {% else %}
+      {{ item.name }} {{ item.value }}
+      {% endif %}
+    validate: "{{ sshd_executable }} -t -f %s"
+  with_items: "{{ sshd_config_params }}"
   notify: sshd reload
 
 - name: sshd start

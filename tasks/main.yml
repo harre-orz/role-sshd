@@ -71,7 +71,7 @@
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "^#?{{ item.name }}\s"
+    regexp: "^#?{{ item.name }} "
     line: "{{ item.name }} {{ item.value }}"
     validate: "{{ sshd_executable }} -t -f %s"
   with_items: "{{ sshd_config_params }}"

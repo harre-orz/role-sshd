@@ -63,7 +63,7 @@
     regexp: "^#?Port "
     line: "Port {{ sshd_port | int }}"
     validate: "{{ sshd_executable }} -t -f %s"
-  notify: sshd restart
+  notify: sshd reload
 
 - name: set the address family
   become: yes
@@ -72,7 +72,7 @@
     regexp: "^#?AddressFamily "
     line: "AddressFamily {{ sshd_address_family }}"
     validate: "{{ sshd_executable }} -t -f %s"
-  notify: sshd restart
+  notify: sshd reload
 
 - name: set listening addresses and ports
   become: yes
@@ -88,7 +88,7 @@
       {% endfor %}
     validate: "{{ sshd_executable }} -t -f %s"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
-  notify: sshd restart
+  notify: sshd reload
 
 - name: erase initialize listen address param
   become: yes
@@ -98,7 +98,7 @@
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
   when: sshd_listen is defined
-  notify: sshd restart
+  notify: sshd reload
 
 - name: apply the config params
   become: yes
@@ -108,7 +108,7 @@
     line: "{{ item.name }} {{ item.value }}"
     validate: "{{ sshd_executable }} -t -f %s"
   with_items: "{{ sshd_config_params }}"
-  notify: sshd restart
+  notify: sshd reload
 
 - name: set the sftp executable
   become: yes
@@ -118,7 +118,7 @@
     line: >-
       Subsystem sftp {% if sshd_use_internal_sftp %}internal-sftp{% else %}{{ sshd_sftp_server_executable }}{% endif %}
     validate: "{{ sshd_executable }} -t -f %s"
-  notify: sshd restart
+  notify: sshd reload
 
 - name: sshd start
   become: yes
@@ -126,7 +126,7 @@
     name: "{{ sshd_service }}"
     state: started
     enabled: yes
-  notify: sshd restart
+  notify: sshd reload
 
 - name: put gossfile
   become: yes
@@ -202,4 +202,4 @@
       # END ANSIBLE MANAGED BLOCK
     dest: "{{ goss_dir }}/sshd.yml"
   when: goss_dir is defined
-  tags: [ sshd, goss ]
+  tags: [ goss ]

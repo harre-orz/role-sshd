@@ -157,6 +157,16 @@
   with_items: "{{ sshd_config_params }}"
   notify: sshd reload
 
+- name: erase initialize config params
+  become: yes
+  lineinfile:
+    path: "{{ sshd_config_file }}"
+    regexp: "^#{{ item.name }}[ \t]"
+    state: absent
+    validate: "{{ sshd_executable }} -t -f %s"
+  with: "{{ sshd_config_params }}"
+  notify: sshd reload
+
 - name: sshd start
   become: yes
   service:

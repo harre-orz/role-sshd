@@ -96,28 +96,28 @@
   become: yes
   blockinfile:
     path: "{{ sshd_config_file }}"
-    insertafter: "^#ListenAddress[ \t]"
+    insertafter: "^#?ListenAddress[ \t]"
     block: |
       {%- for sa in sshd_listen -%}
       ListenAddress
-      {%- if sa.ipv4 is defined and sa.ipv6 is not defined -%}
-       {{ sa.ipv4 | ipv4 }}
+      {% if sa.ipv4 is defined and sa.ipv6 is not defined -%}
+      {{ sa.ipv4 | ipv4 }}
       {%- elif sa.ipv6 is defined and sa.ipv4 is not defined -%}
-       [{{ sa.ipv6 | ipv6 }}]
+      [{{ sa.ipv6 | ipv6 }}]
       {%- else -%}
       {{ "Invalid sshd_listen variable."/0 }}
       {%- endif -%}
       :{{ sa.port | int }}
       {%- endfor -%}
-    validate: "{{ sshd_executable }} -t -f %s"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
-  notify: sshd reload
+      validate: "{{ sshd_executable }} -t -f %s"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
+      notify: sshd reload
 
 - name: erase initialize listen address param
   become: yes
   lineinfile:
     path: "{{ sshd_config_file }}"
-    regexp: "{{ '^#?' }}ListenAddress[ \t]"
+    regexp: "^#?ListenAddress[ \t]"
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
   when: sshd_listen is defined
@@ -130,11 +130,11 @@
     regexp: '^#?Subsystem[ \t]+sftp[ \t]'
     line: >-
       Subsystem sftp
-      {% if sshd_use_internal_sftp %}
+      {% if sshd_use_internal_sftp -%}
       internal-sftp
-      {% else %}
+      {%- else -%}
       {{ sshd_sftp_server_executable }}
-      {% endif %}
+      {%- endif -%}
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd reload
 

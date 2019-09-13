@@ -109,9 +109,9 @@
       {%- endif -%}
       :{{ sa.port | int }}
       {%- endfor -%}
-      validate: "{{ sshd_executable }} -t -f %s"
-      marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
-      notify: sshd reload
+    validate: "{{ sshd_executable }} -t -f %s"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"
+    notify: sshd reload
 
 - name: erase initialize listen address param
   become: yes

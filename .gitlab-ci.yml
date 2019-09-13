@@ -4,11 +4,11 @@ test-centos7:
     - python -V
     - pip install ansible ansible-lint
     - ansible --version
+    - sudo cat /etc/ssh/sshd_config.orig
   script:
     - cd tests
     - ansible-lint main.yml
     - ansible-playbook --verbose --diff main.yml
   after_script:
-    - sudo cat /etc/ssh/sshd_config.orig
-    - echo "----"
     - sudo cat /etc/ssh/sshd_config
+    - sudo diff -u /etc/ssh/sshd_config /etc/ssh/sshd_config.orig

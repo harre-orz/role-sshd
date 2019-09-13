@@ -164,7 +164,7 @@
     regexp: "^#{{ item.name }}[ \t]"
     state: absent
     validate: "{{ sshd_executable }} -t -f %s"
-  with: "{{ sshd_config_params }}"
+  with_items: "{{ sshd_config_params }}"
   notify: sshd reload
 
 - name: sshd start

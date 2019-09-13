@@ -9,10 +9,6 @@
       # Require
       - name: ChallengeResponseAuthentication
         value: 'no'
-      - name: DenyGroups
-        optiona:
-        value: >-
-          {{ sshd_deny_groups | join(' ') }}
       - name: UsePAM
         value: 'yes'
       - name: UseDNS
@@ -53,18 +49,22 @@
       - name: KerberosAuthentication
         value: 'no'
       # Optional
-      - name: AllowGroups
-        optional:
-        value: >-
-          {{ sshd_allow_groups | join(' ') }}
       - name: AllowUsers
         optional:
         value: >-
           {{ sshd_allow_users | join(' ') }}
+      - name: AllowGroups
+        optional:
+        value: >-
+          {{ sshd_allow_groups | join(' ') }}
       - name: DenyUsers
-        optiona:
+        optional:
         value: >-
           {{ sshd_deny_users | join(' ') }}
+      - name: DenyGroups
+        optional:
+        value: >-
+          {{ sshd_deny_groups | join(' ') }}
     tags: [ always ]
 
 - name: backup the config file
@@ -99,10 +99,15 @@
     insertafter: "^#ListenAddress[ \t]"
     block: |
       {% for sa in sshd_listen %}
-      {% if sa.ipv4 is defined and sa.ipv6 is not defined %}ListenAddress {{ sa.ipv4 | ipv4 }}{% if sa.port is defined %}:{{ sa.port | int }}{% endif %}
-      {% elif sa.ipv6 is defined and sa.ipv4 is not defined %}ListenAddress [{{ sa.ipv6 | ipv6 }}]{% if sa.port is defined %}:{{ sa.port | int }}{% endif %}
-      {% else %}{{ "Invalid sshd_listen variable."/0 }}
+      ListenAddress
+      {% if sa.ipv4 is defined and sa.ipv6 is not defined %}
+      {{ sa.ipv4 | ipv4 }}
+      {% elif sa.ipv6 is defined and sa.ipv4 is not defined %}
+      [{{ sa.ipv6 | ipv6 }}]
+      {% else %}
+      {{ "Invalid sshd_listen variable."/0 }}
       {% endif %}
+      :{{ sa.port | int }}
       {% endfor %}
     validate: "{{ sshd_executable }} -t -f %s"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - ListenAddress"

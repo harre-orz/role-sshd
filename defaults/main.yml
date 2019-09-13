@@ -35,9 +35,9 @@ sshd_ask_pass: yes
 sshd_permit_root_login: 'yes'
 
 
-## Specify the allow UNIX user/group
+# Specify the allow UNIX user/group
 sshd_allow_users: []
-sshd_allow_groups: [ sshusers ]
+sshd_allow_groups: []
 
 
 # Specify the deny UNIX user/group
@@ -51,5 +51,5 @@ sshd_tcp_forwarding: yes
 sshd_x11_forwarding: yes
 
 
-## Whether to use internal-sftp
+# Whether to use internal-sftp
 sshd_use_internal_sftp: no

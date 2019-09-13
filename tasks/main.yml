@@ -130,11 +130,11 @@
     regexp: '^#?Subsystem[ \t]+sftp[ \t]'
     line: >-
       Subsystem sftp
-      {%- if sshd_use_internal_sftp -%}
-       internal-sftp
-      {%- else -%}
-       {{ sshd_sftp_server_executable }}
-      {%- endif -%}
+      {% if sshd_use_internal_sftp %}
+      internal-sftp
+      {% else %}
+      {{ sshd_sftp_server_executable }}
+      {% endif %}
     validate: "{{ sshd_executable }} -t -f %s"
   notify: sshd reload
 

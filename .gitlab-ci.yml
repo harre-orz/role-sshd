@@ -1,5 +1,5 @@
-test-centos7:
-  image: ansible/ansible:centos7
+test-ubuntu:
+  image: ansible/ansible:ubuntu1404
   before_script:
     - python -V
     - pip install ansible ansible-lint

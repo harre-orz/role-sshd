@@ -1,6 +1,8 @@
 test-centos7:
-  image: ansible/ansible:centos6
+  image: ansible/ansible:ubuntu1404
   before_script:
+    - sudo dpkg-divert --local --rename --add /sbin/initctl
+    - sudo ln -s /bin/true /sbin/initctl
     - python -V
     - pip install ansible ansible-lint
     - ansible --version

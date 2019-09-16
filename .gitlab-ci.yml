@@ -5,12 +5,14 @@ test-centos7:
     - pip install ansible ansible-lint
     - ansible --version
     - sudo cat /etc/ssh/sshd_config
+    - yum install -y openssh-server
   script:
     - cd tests
     - ansible-lint main.yml
     - ansible-playbook --verbose --diff main.yml
   after_script:
     - which systemctl
+    - systemctl status
     - sudo systemctl restart sshd
     - sudo cat /etc/ssh/sshd_config
     - sudo diff -u /etc/ssh/sshd_config.orig /etc/ssh/sshd_config

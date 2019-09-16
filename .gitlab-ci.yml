@@ -5,6 +5,7 @@ test-centos7:
     - pip install ansible ansible-lint
     - ansible --version
     - sudo cat /etc/ssh/sshd_config
+    - sudp apt-get update
     - sudo apt-get -y install ssh
   script:
     - cd tests

@@ -86,7 +86,7 @@
     name: "{{ item }}"
   with_items: "{{ sshd_allow_groups + sshd_deny_groups }}"
 
-- make: make directory
+- name: make directory
   file:
     path: "{{ item }}"
     state: directory

@@ -1,5 +1,5 @@
-test-ubuntu:
-  image: ansible/ansible:ubuntu1404
+test-centos7:
+  image: ansible/ansible:centos7
   before_script:
     - python -V
     - pip install ansible ansible-lint
@@ -10,6 +10,5 @@ test-ubuntu:
     - ansible-lint main.yml
     - ansible-playbook --verbose --diff main.yml
   after_script:
-    - sudo systemctl status sshd.service
     - sudo cat /etc/ssh/sshd_config
     - sudo diff -u /etc/ssh/sshd_config.orig /etc/ssh/sshd_config

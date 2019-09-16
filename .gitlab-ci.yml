@@ -6,13 +6,10 @@ test-centos7:
     - ansible --version
     - sudo cat /etc/ssh/sshd_config
     - sudp apt-get update
-    - sudo apt-get -y install ssh
   script:
     - cd tests
     - ansible-lint main.yml
     - ansible-playbook --verbose --diff main.yml
   after_script:
-    - which systemctl
-    - sudo systemctl restart ssh
     - sudo cat /etc/ssh/sshd_config
     - sudo diff -u /etc/ssh/sshd_config.orig /etc/ssh/sshd_config

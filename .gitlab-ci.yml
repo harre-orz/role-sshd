@@ -12,7 +12,6 @@ test-centos7:
     - ansible-playbook --verbose --diff main.yml
   after_script:
     - which systemctl
-    - systemctl status
     - sudo systemctl restart sshd
     - sudo cat /etc/ssh/sshd_config
     - sudo diff -u /etc/ssh/sshd_config.orig /etc/ssh/sshd_config

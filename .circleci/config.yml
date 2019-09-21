@@ -7,7 +7,7 @@ jobs:
     working_directory: ~/sshd/
     steps:
       - run: yum install -y https://centos7.iuscommunity.org/ius-release.rpm
-      - run: yum install python36u python36u-libs python36u-devel python36u-pip
+      - run: yum install -y python36u python36u-libs python36u-devel python36u-pip
       - run: pip3.6 install ansible ansible-lint
       - checkout
       - run:

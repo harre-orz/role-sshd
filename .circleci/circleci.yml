@@ -1,0 +1,3 @@
+version: 2.1
+orbs:
+  ansible-ssh: orbss/ansible-ssh@0.7.4

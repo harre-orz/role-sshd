@@ -9,7 +9,7 @@ jobs:
     working_directory: ~/project/tests/
     steps:
       - run: sudo pip install ansible ansible-lint
-      - run: ansible-playbook test.yml
+      - run: ansible-playbook main.yml
 workflows:
   my-workflow:
     jobs:

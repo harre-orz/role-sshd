@@ -4,6 +4,6 @@ orbs:
   ansible-ssh: orbss/ansible-ssh@0.7.4
 
 workflows:
-  ansible:
+  main:
     jobs:
-      - ansible-ssh/orbss
+      - ansible-ssh/ansible-ssh

@@ -4,7 +4,8 @@ orbs:
 
 jobs:
   build:
-    machine: true
+    docker:
+      - image: 'tomonorimatsumura/centos7-ansible:yum'
     steps:
       - ansible-ssh/ansible-playbook
 

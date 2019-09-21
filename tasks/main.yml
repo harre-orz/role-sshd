@@ -69,6 +69,12 @@
           {{ sshd_deny_groups | join(' ') }}
     tags: [ always ]
 
+- name: install
+  become: yes
+  package:
+    name: "{{ sshd_package }}"
+    state: present
+
 - name: backup the config file
   become: yes
   shell: |

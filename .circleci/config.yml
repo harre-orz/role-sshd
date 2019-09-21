@@ -6,9 +6,11 @@ jobs:
       - image: 'centos/systemd'
     working_directory: ~/sshd/
     steps:
-      - run: yum install -y https://centos7.iuscommunity.org/ius-release.rpm
-      - run: yum install -y python36u python36u-libs python36u-devel python36u-pip
-      - run: pip3.6 install ansible ansible-lint
+      - run:
+          command: |
+            yum install -y epel-release
+            yum install -y python-pip --enablerepo=epel
+            pip install ansible ansible-lint
       - checkout
       - run:
           command: ansible-playbook main.yml

@@ -6,13 +6,13 @@ jobs:
   build:
     docker:
       - image: 'ansible/ansible:centos7'
-    working_directory: ~/project/tests/
     steps:
-      - run: python --version
+      - checkout:
       - run: sudo pip install ansible ansible-lint
-      - run: ansible --version
-      - run: ls -l
-      - run: ansible-playbook main.yml
+      - run:
+          name: build
+          command: ansible-playbook main.yml
+          working_directory: ~/project/tests/
 workflows:
   my-workflow:
     jobs:

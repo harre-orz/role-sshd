@@ -5,6 +5,4 @@ orbs:
 workflows:
   my-workflow:
     jobs:
-      - build:
-        steps:
-          - ansible-ssh/ansible-ssh
+      - ansible-ssh/ansible-ssh

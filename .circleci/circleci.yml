@@ -4,6 +4,11 @@ orbs:
   ansible-ssh: orbss/ansible-ssh@0.7.4
 
 jobs:
-  build:
+  xxx:
     steps:
       - ansible-ssh/ansible-ssh
+
+workflows:
+  yyy:
+    jobs:
+      - xxx

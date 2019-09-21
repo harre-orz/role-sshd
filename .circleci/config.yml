@@ -4,7 +4,7 @@ orbs:
 
 jobs:
   build:
-    executor: machine
+    machine: true
     steps:
       - ansible-ssh/ansible-ssh
 

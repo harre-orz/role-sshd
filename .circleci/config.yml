@@ -8,7 +8,10 @@ jobs:
       - image: 'ansible/ansible:centos7'
     working_directory: ~/project/tests/
     steps:
+      - run: python --version
       - run: sudo pip install ansible ansible-lint
+      - run: ansible --version
+      - run: ls -l
       - run: ansible-playbook main.yml
 workflows:
   my-workflow:

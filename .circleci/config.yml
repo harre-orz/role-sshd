@@ -1,19 +1,19 @@
 version: 2.1
-orbs:
-  ansible-ssh: orbss/ansible-ssh@0.7.4
 
 jobs:
   build:
     docker:
-      - image: 'ansible/ansible:centos7'
+      - image: 'centos/systemd'
     working_directory: ~/sshd/
     steps:
+      - run: sudo yum install -y https://centos7.iuscommunity.org/ius-release.rpm
+      - run: sudo yum install python36u python36u-libs python36u-devel python36u-pip
+      - run: sudo pip3.6 install ansible ansible-lint
       - checkout
-      - run: sudo pip install ansible ansible-lint
       - run:
-          name: build
           command: ansible-playbook main.yml
           working_directory: ~/sshd/tests/
+
 workflows:
   my-workflow:
     jobs:

@@ -1,11 +1,9 @@
 version: 2.1
 
 orbs:
-  ansible-ssh: orbss/ansible-ssh@0.7.4
+    hello: circleci/hello-build@0.0.5
 
 workflows:
-  main:
-    jobs:
-      - build:
-        steps:
-          - ansible-ssh/ansible-ssh
+    "Hello Workflow":
+        jobs:
+          - hello/hello-build

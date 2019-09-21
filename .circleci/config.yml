@@ -5,10 +5,11 @@ orbs:
 jobs:
   build:
     docker:
-      - image: 'tomonorimatsumura/centos7-ansible:yum'
+      - image: 'ansible/ansible:centos7'
+    working_directory: ~/project/tests/
     steps:
-      - ansible-ssh/ansible-playbook
-
+      - run: sudo pip install ansible ansible-lint
+      - run: ansible-playbook test.yml
 workflows:
   my-workflow:
     jobs:

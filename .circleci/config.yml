@@ -6,7 +6,7 @@ jobs:
   build:
     machine: true
     steps:
-      - ansible-ssh/ansible-ssh
+      - ansible-ssh/ansible-playbook
 
 workflows:
   my-workflow:

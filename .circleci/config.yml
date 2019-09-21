@@ -7,7 +7,7 @@ jobs:
     docker:
       - image: 'ansible/ansible:centos7'
     steps:
-      - checkout:
+      - checkout
       - run: sudo pip install ansible ansible-lint
       - run:
           name: build
